@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="Student/task02.csproj" Id="d1bbaa85-c971-47ca-8ec0-1797304171ee" />
   <Project Path="task01/task01.csproj" />
   <Project Path="task01tests/task01tests.csproj" />
+  <Project Path="task02tests/task02tests.csproj" Id="c284b7e4-2c5d-457f-b18b-216091cc034c" />
 </Solution>

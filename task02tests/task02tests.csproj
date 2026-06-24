@@ -15,7 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Student\task02.csproj" />
+    <ProjectReference Include="..\task02\task02.csproj" />
+    <ProjectReference Include="..\task02\task02.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -21,24 +21,24 @@ jobs:
 
     - name: Restore dependencies
       run: |
-        if ls *.sln 1> /dev/null 2>&1; then
-          dotnet restore *.sln
+        if ls *.slnx 1> /dev/null 2>&1; then
+          dotnet restore *.slnx
         else
-          echo "No .sln file found, skipping restore"
+          echo "No .slnx file found, skipping restore"
         fi
 
     - name: Build project
       run: |
-        if ls *.sln 1> /dev/null 2>&1; then
-          dotnet build *.sln --no-restore --configuration Release
+        if ls *.slnx 1> /dev/null 2>&1; then
+          dotnet build *.slnx --no-restore --configuration Release
         else
-          echo "No .sln file found, skipping build"
+          echo "No .slnx file found, skipping build"
         fi
 
     - name: Run Tests
       run: |
-        if ls *.sln 1> /dev/null 2>&1; then
-          dotnet test *.sln --no-build --configuration Release --verbosity normal
+        if ls *.slnx 1> /dev/null 2>&1; then
+          dotnet test *.slnx --no-build --configuration Release --verbosity normal
         else
-          echo "No .sln file found, skipping tests"
+          echo "No .slnx file found, skipping tests"
         fi

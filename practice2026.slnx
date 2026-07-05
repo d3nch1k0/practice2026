@@ -1,1 +1,6 @@
-<Solution />
+<Solution>
+  <Project Path="AnalyticsPlugin/AnalyticsPlugin.csproj" Id="56af481c-aedc-4138-ba30-c5b84c77714e" />
+  <Project Path="CommandLib/CommandLib.csproj" Id="634d3121-4847-487c-a22d-7362c5e7f8b1" />
+  <Project Path="DataBasePlugin/DataBasePlugin.csproj" Id="6baeb65e-12be-4bf9-a7c8-c31decd6a4cc" />
+  <Project Path="PluginSystem.App/PluginSystem.App.csproj" Id="ee230e2f-2192-4bef-8c24-d1261aee38ef" />
+</Solution>

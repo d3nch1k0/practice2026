@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\CommandLib\CommandLib.csproj" />
+	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="Build">
+		<Copy SourceFiles="$(TargetDir)$(TargetName).dll"
+			  DestinationFolder="$(SolutionDir)PluginSystem.App\bin\$(Configuration)\net10.0\plugins\" />
+		<Copy SourceFiles="$(TargetDir)$(TargetName).pdb"
+			  DestinationFolder="$(SolutionDir)PluginSystem.App\bin\$(Configuration)\net10.0\plugins\"
+			  Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
+	</Target>
+</Project>

@@ -1,1 +1,5 @@
-<Solution />
+<Solution>
+  <Project Path="MetadataViewer/MetadataViewer.csproj" Id="bc68728f-4075-4c2b-b5f9-150670267fab" />
+  <Project Path="task07/task09.csproj" Id="941449fc-c995-432e-a5fe-74ebfc914b7c" />
+  <Project Path="task07tests/task09tests.csproj" Id="c8704b61-d7f0-4335-b684-2e4923b67ef1" />
+</Solution>

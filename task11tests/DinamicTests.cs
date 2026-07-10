@@ -42,5 +42,12 @@ namespace task11tests
 
             Assert.Throws<InvalidOperationException>(() => ClassGenerator.CreateCalculator(badrow));
         }
+
+        [Fact]
+        public void CreateCalculator_ShouldHandleDivisionByZero()
+        {
+            ICalculator calculator = ClassGenerator.CreateCalculator(row);
+            Assert.Throws<DivideByZeroException>(() => calculator.Div(10, 0));
+        }
     }
 }

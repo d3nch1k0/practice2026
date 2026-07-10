@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Collections.Generic;
 
 namespace task11
 {
@@ -16,7 +17,8 @@ namespace task11
             {
                 throw new ArgumentNullException(nameof(row));
             }
-            string newRow = row.Replace("public class Calculator","public class Calculator: task11.ICalculator");
+
+            string newRow = row.Replace("public class Calculator", "public class Calculator: task11.ICalculator");
 
             var syntaxTree = CSharpSyntaxTree.ParseText(newRow);
 
@@ -26,6 +28,7 @@ namespace task11
                 MetadataReference.CreateFromFile(typeof(ICalculator).Assembly.Location),
                 MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Runtime")).Location),
                 MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("mscorlib")).Location),
+                MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Private.CoreLib")).Location),
             };
 
             var compilation = CSharpCompilation.Create(
@@ -40,7 +43,7 @@ namespace task11
                 var result = compilation.Emit(ms);
                 if (!result.Success)
                 {
-                    throw new InvalidOperationException("Ошибка компиляции");
+                    throw new InvalidOperationException($"Ошибка компиляции.");
                 }
 
                 ms.Seek(0, SeekOrigin.Begin);
@@ -49,14 +52,24 @@ namespace task11
                 Type calculatorType = assembly.GetType("Calculator");
                 if (calculatorType == null)
                 {
-                    throw new InvalidOperationException("Ошибка, не найден класс Calculator");
+                    throw new InvalidOperationException("Не найден класс Calculator");
                 }
+
                 object rawInstance = Activator.CreateInstance(calculatorType);
+                if (rawInstance == null)
+                {
+                    throw new InvalidOperationException("Не удалось создать экземпляр Calculator");
+                }
 
-                return (ICalculator)rawInstance;
+                if (rawInstance is ICalculator calculator)
+                {
+                    return calculator;
+                }
+                else
+                {
+                    throw new InvalidOperationException("Созданный объект не реализует интерфейс ICalculator");
+                }
             }
-
-            
         }
     }
 }

@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\task08\CommandLib.csproj" />
+    <ProjectReference Include="..\CommandLib\CommandLib.csproj" />
   </ItemGroup>
 
 </Project>

@@ -11,12 +11,16 @@ namespace task05
 
         public ClassAnalyzer(Type type)
         {
-            _type = type;
+            _type = type ?? throw new ArgumentNullException(nameof(type));
         }
         public IEnumerable<string> GetPublicMethods()
         {
+            if (_type == null)
+                return Enumerable.Empty<string>();
+
             return _type.GetMethods().Select(a => a.Name);
         }
+
         public IEnumerable<string> GetMethodParams(string methodname)
         {
             var method = _type.GetMethod(methodname);
@@ -42,7 +46,10 @@ namespace task05
 
         public bool HasAttribute<T>() where T : Attribute
         {
-            return _type.GetCustomAttributes(typeof(T), true).Any();
+            if (_type == null)
+                return false;
+
+            return _type.IsDefined(typeof(T), true);
         }
     }
 }

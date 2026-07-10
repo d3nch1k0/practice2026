@@ -113,6 +113,18 @@ namespace task09
                     }
                 }
             }
+            catch (ReflectionTypeLoadException ex)
+            {
+                Console.WriteLine($"Ошибка загрузки типов: {ex.Message}");
+                if (ex.LoaderExceptions != null)
+                {
+                    foreach (var loaderEx in ex.LoaderExceptions)
+                    {
+                        if (loaderEx != null)
+                            Console.WriteLine($"  - {loaderEx.Message}");
+                    }
+                }
+            }
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка: {ex.Message}");

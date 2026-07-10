@@ -11,15 +11,12 @@ namespace task04
 
         public void MoveForward()
         {
-            Console.WriteLine($"Speed: {Speed}");
         }
         public void Rotate(int angle)
         {
-            Console.WriteLine($"Rotat: {angle}");
         }
         public void Fire()
         {
-            Console.WriteLine($"Damage: {FirePower}");
         }
     }
 }

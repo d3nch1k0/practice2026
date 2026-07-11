@@ -59,5 +59,18 @@ namespace task14
             barrier.SignalAndWait();
             return totalsum;
         }
+        public static double SolveSingleThreaded(double a, double b, Func<double, double> function, double step)
+        {
+            double totalSum = 0.0;
+            int totalSteps = (int)Math.Round((b - a) / step);
+
+            for (int j = 0; j < totalSteps; j++)
+            {
+                double x1 = a + j * step;
+                double x2 = a + (j + 1) * step;
+                totalSum += (function(x1) + function(x2)) / 2.0 * step;
+            }
+            return totalSum;
+        }
     }
 }

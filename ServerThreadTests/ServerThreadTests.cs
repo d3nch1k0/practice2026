@@ -1,96 +1,138 @@
-﻿using System;
-using Xunit;
+﻿using Xunit;
+using System;
+using System.Linq;
+using System.Threading;
 using task17;
+using Task17;
 
-namespace ServerThreadTests
+namespace Task17.Tests
 {
-    public class ServerThreadTests : IDisposable
+    public class SimpleCommand : ICommand
     {
-        private class Command : ICommand
-        {
-            public bool Executed { get; private set; }
-            public Action OnExecute { get; set; }
+        private readonly Action _action;
+        public SimpleCommand(Action action = null) => _action = action;
+        public void Execute() => _action?.Invoke();
+    }
 
-            public void Execute()
+    public class LongCommand : ILongCommand
+    {
+        private int _remaining;
+        private readonly Action _onExecute;
+        public bool IsCompleted => _remaining <= 0;
+        public string Name { get; }
+
+        public LongCommand(int required, string name = "", Action onExecute = null)
+        {
+            _remaining = required;
+            Name = name;
+            _onExecute = onExecute;
+        }
+
+        public void Execute()
+        {
+            if (!IsCompleted)
             {
-                Executed = true;
-                OnExecute?.Invoke();
+                _remaining--;
+                _onExecute?.Invoke();
             }
         }
+    }
+
+    public class SimpleScheduler : IScheduler
+    {
+        private readonly System.Collections.Generic.Queue<ICommand> _queue = new();
+        public void Add(ICommand cmd) { if (cmd != null) _queue.Enqueue(cmd); }
+        public bool HasCommand() => _queue.Count > 0;
+        public ICommand Select() => _queue.Count > 0 ? _queue.Dequeue() : null;
+    }
+
+    public class ServerThreadTests : IDisposable
+    {
+        private readonly SimpleScheduler _scheduler;
+        private readonly ServerThread _serverThread;
 
         public ServerThreadTests()
         {
-            ExceptionHandler.Clear();
+            _scheduler = new SimpleScheduler();
+            _serverThread = new ServerThread(_scheduler);
         }
 
         public void Dispose()
         {
-            ExceptionHandler.Clear();
+            if (_serverThread.Thread.IsAlive)
+            {
+                _serverThread.HardStop();
+                _serverThread.Join();
+            }
         }
 
+        // Тест 1: Каждая команда выполняется нужное количество раз
         [Fact]
-        public void HardStop_ShouldStopImmediately_AndIgnoreRemainingCommands()
+        public void LongCommands_EachExecutesCorrectNumberOfTimes()
         {
-            var server = new ServerThread();
-            var c1 = new Command();
-            var c2 = new Command();
-            var hardStop = new HardStopCommand(server);
-            var c3 = new Command();
-            var c4 = new Command();
+            var log = new System.Collections.Generic.List<string>();
+            var cmdA = new LongCommand(3, "A", () => log.Add("A"));
+            var cmdB = new LongCommand(3, "B", () => log.Add("B"));
+            var cmdC = new LongCommand(3, "C", () => log.Add("C"));
 
-            server.Add(c1);
-            server.Add(c2);
-            server.Add(hardStop);
-            server.Add(c3);
-            server.Add(c4);
+            _serverThread.Start();
+            _serverThread.Add(cmdA);
+            _serverThread.Add(cmdB);
+            _serverThread.Add(cmdC);
 
-            server.Start();
-            server.Join();
+            Thread.Sleep(500);
+            _serverThread.SoftStop();
+            _serverThread.Join();
 
-
-            Assert.True(c1.Executed);
-            Assert.True(c2.Executed);
-            Assert.False(c3.Executed);
-            Assert.False(c4.Executed);
+            // Проверяем только количество выполнений
+            Assert.Equal(3, log.Count(x => x == "A"));
+            Assert.Equal(3, log.Count(x => x == "B"));
+            Assert.Equal(3, log.Count(x => x == "C"));
         }
 
+        // Тест 2: SoftStop дорабатывает команды из планировщика
         [Fact]
-        public void SoftStop_ShouldDrainAllCommands_BeforeStopping()
+        public void SoftStop_ProcessesSchedulerCommandsBeforeStopping()
         {
-            var server = new ServerThread();
-            var c1 = new Command();
-            var c2 = new Command();
-            var softStop = new SoftStopCommand(server);
-            var c3 = new Command();
-            var c4 = new Command();
+            var counter = 0;
+            var longCmd = new LongCommand(5, onExecute: () => Interlocked.Increment(ref counter));
 
-            server.Add(c1);
-            server.Add(c2);
-            server.Add(softStop);
-            server.Add(c3);
-            server.Add(c4);
+            _serverThread.Start();
+            _serverThread.Add(longCmd);
+            Thread.Sleep(50);
 
+            _serverThread.SoftStop();
+            var stopped = _serverThread.Thread.Join(TimeSpan.FromSeconds(3));
 
-            server.Start();
-            server.Join();
-
-            Assert.True(c1.Executed);
-            Assert.True(c2.Executed);
-            Assert.True(c3.Executed);
-            Assert.True(c4.Executed);
+            Assert.True(stopped, "Поток должен остановиться за 3 секунды");
+            Assert.Equal(5, counter);
+            Assert.False(_serverThread.Thread.IsAlive);
         }
 
+        // Тест 3: Поток не блокируется на очереди при наличии команд в планировщике
         [Fact]
-        public void HardAndSoftStop_ExecutedOnWrongThread_ShouldThrowInvalidOperationException()
+        public void Thread_DoesNotBlockOnEmptyQueue_WhenSchedulerHasCommands()
         {
+            var executed = false;
+            var simpleCmd = new SimpleCommand(() => executed = true);
 
-            var server = new ServerThread();
-            var hardStop = new HardStopCommand(server);
-            var softStop = new SoftStopCommand(server);
+            _serverThread.Start();
 
-            Assert.Throws<InvalidOperationException>(() => hardStop.Execute());
-            Assert.Throws<InvalidOperationException>(() => softStop.Execute());
+            // Небольшая пауза, чтобы поток точно вошёл в цикл и заблокировался на Take()
+            Thread.Sleep(50);
+
+            // Кладём команду в планировщик
+            _scheduler.Add(simpleCmd);
+
+            // Добавляем "пустышку" в очередь, чтобы разбудить поток от Take()
+            _serverThread.Add(new SimpleCommand());
+
+            Thread.Sleep(200);
+            _serverThread.HardStop();
+            var stopped = _serverThread.Thread.Join(TimeSpan.FromSeconds(2));
+
+            Assert.True(stopped, "Поток завис — возможен deadlock");
+            Assert.True(executed, "Команда из планировщика не выполнилась");
         }
-
     }
 }

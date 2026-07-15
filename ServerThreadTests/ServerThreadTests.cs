@@ -66,7 +66,6 @@ namespace Task17.Tests
             }
         }
 
-        // Тест 1: Каждая команда выполняется нужное количество раз
         [Fact]
         public void LongCommands_EachExecutesCorrectNumberOfTimes()
         {
@@ -84,13 +83,11 @@ namespace Task17.Tests
             _serverThread.SoftStop();
             _serverThread.Join();
 
-            // Проверяем только количество выполнений
             Assert.Equal(3, log.Count(x => x == "A"));
             Assert.Equal(3, log.Count(x => x == "B"));
             Assert.Equal(3, log.Count(x => x == "C"));
         }
 
-        // Тест 2: SoftStop дорабатывает команды из планировщика
         [Fact]
         public void SoftStop_ProcessesSchedulerCommandsBeforeStopping()
         {
@@ -109,7 +106,6 @@ namespace Task17.Tests
             Assert.False(_serverThread.Thread.IsAlive);
         }
 
-        // Тест 3: Поток не блокируется на очереди при наличии команд в планировщике
         [Fact]
         public void Thread_DoesNotBlockOnEmptyQueue_WhenSchedulerHasCommands()
         {
@@ -118,13 +114,10 @@ namespace Task17.Tests
 
             _serverThread.Start();
 
-            // Небольшая пауза, чтобы поток точно вошёл в цикл и заблокировался на Take()
             Thread.Sleep(50);
 
-            // Кладём команду в планировщик
             _scheduler.Add(simpleCmd);
 
-            // Добавляем "пустышку" в очередь, чтобы разбудить поток от Take()
             _serverThread.Add(new SimpleCommand());
 
             Thread.Sleep(200);

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using task17;
 
-namespace Task17
+namespace task17
 {
     public class RoundRobinScheduler : IScheduler
     {

@@ -1,1 +1,4 @@
-<Solution />
+<Solution>
+  <Project Path="ServerThreadTests/ServerThreadTests.csproj" Id="8fcd3231-d264-4767-9375-d52831a66b94" />
+  <Project Path="task17/task17.csproj" Id="e75f6349-134a-41b2-a109-a8fa58a6fc3b" />
+</Solution>

@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using task17;
 
-namespace Task17
+namespace task17
 {
     public class RoundRobinScheduler : IScheduler
     {
@@ -22,7 +21,15 @@ namespace Task17
             lock (_lock)
             {
                 if (_commands.Count == 0) return null;
-                return _commands.Dequeue();
+                
+                var command = _commands.Dequeue();
+                
+                if (command is ILongCommand longCommand && !longCommand.IsCompleted)
+                {
+                    _commands.Enqueue(command);
+                }
+                
+                return command;
             }
         }
 

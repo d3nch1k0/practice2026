@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading;
-using Task17;
+using task17;
 
 
 namespace task17

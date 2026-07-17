@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using task17;
 
-namespace Task17
+namespace task17
 {
     public class ServerThread
     {
